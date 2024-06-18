@@ -43,7 +43,7 @@ public class RestaurantApiController {
      * Deletes a restaurant by ID.
      *
      * @param id The ID of the restaurant to delete.
-     * @return ResponseEntity with a success message, or a ResourceNotFoundException if the restaurant is not found.
+     * @return ResponseEntity w a success message, or a ResourceNotFoundException if the restaurant is not found.
      */
     @DeleteMapping("/api/restaurants/{id}")
     public ResponseEntity<Object> deleteRestaurant(@PathVariable int id){
