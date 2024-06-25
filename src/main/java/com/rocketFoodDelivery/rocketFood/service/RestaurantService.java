@@ -46,31 +46,31 @@ public class RestaurantService {
         return restaurantRepository.findAll();
     }
 
-    /**
-     * Retrieves a restaurant with its details, including the average rating, based on the provided restaurant ID.
-     *
-     * @param id The unique identifier of the restaurant to retrieve.
-     * @return An Optional containing a RestaurantDTO with details such as id, name, price range, and average rating.
-     *         If the restaurant with the given id is not found, an empty Optional is returned.
-     *
-     * @see RestaurantRepository#findRestaurantWithAverageRatingById(int) for the raw query details from the repository.
-     */
-    public Optional<ApiRestaurantDto> findRestaurantWithAverageRatingById(int id) {
-        List<Object[]> restaurant = restaurantRepository.findRestaurantWithAverageRatingById(id);
+    // /**
+    //  * Retrieves a restaurant with its details, including the average rating, based on the provided restaurant ID.
+    //  *
+    //  * @param id The unique identifier of the restaurant to retrieve.
+    //  * @return An Optional containing a RestaurantDTO with details such as id, name, price range, and average rating.
+    //  *         If the restaurant with the given id is not found, an empty Optional is returned.
+    //  *
+    //  * @see RestaurantRepository#findRestaurantWithAverageRatingById(int) for the raw query details from the repository.
+    //  */
+    // public Optional<ApiRestaurantDto> findRestaurantWithAverageRatingById(int id) {
+    //     List<Object[]> restaurant = restaurantRepository.findRestaurantWithAverageRatingById(id);
 
-        if (!restaurant.isEmpty()) {
-            Object[] row = restaurant.get(0);
-            int restaurantId = (int) row[0];
-            String name = (String) row[1];
-            int priceRange = (int) row[2];
-            double rating = (row[3] != null) ? ((BigDecimal) row[3]).setScale(1, RoundingMode.HALF_UP).doubleValue() : 0.0;
-            int roundedRating = (int) Math.ceil(rating);
-            ApiRestaurantDto restaurantDto = new ApiRestaurantDto(restaurantId, name, priceRange, roundedRating);
-            return Optional.of(restaurantDto);
-        } else {
-            return Optional.empty();
-        }
-    }
+    //     if (!restaurant.isEmpty()) {
+    //         Object[] row = restaurant.get(0);
+    //         int restaurantId = (int) row[0];
+    //         String name = (String) row[1];
+    //         int priceRange = (int) row[2];
+    //         double rating = (row[3] != null) ? ((BigDecimal) row[3]).setScale(1, RoundingMode.HALF_UP).doubleValue() : 0.0;
+    //         int roundedRating = (int) Math.ceil(rating);
+    //         ApiRestaurantDto restaurantDto = new ApiRestaurantDto(restaurantId, name, priceRange, roundedRating);
+    //         return Optional.of(restaurantDto);
+    //     } else {
+    //         return Optional.empty();
+    //     }
+    // }
 
     /**
      * Finds restaurants based on the provided rating and price range.
@@ -92,6 +92,7 @@ public class RestaurantService {
                 double avgRating = (row[3] != null) ? ((BigDecimal) row[3]).setScale(1, RoundingMode.HALF_UP).doubleValue() : 0.0;
                 int roundedAvgRating = (int) Math.ceil(avgRating);
                 restaurantDtos.add(new ApiRestaurantDto(restaurantId, name, range, roundedAvgRating));
+
             }
 
             return restaurantDtos;
@@ -111,9 +112,7 @@ public class RestaurantService {
         return null; // TODO return proper object
     }
 
-    // TODO
-
-    /**
+    /**ALL THE FOLLOWING BELOW IS WHAT I ADDED ON MY OWN
      * Finds a restaurant by its ID.
      *
      * @param id The ID of the restaurant to retrieve.
@@ -121,7 +120,35 @@ public class RestaurantService {
      *         or Optional.empty() if no restaurant is found.
      */
     public Optional<Restaurant> findById(int id) {
-        return null; // TODO return proper object
+        return restaurantRepository.findById(id);
+    }
+
+    /**
+     * Finds a restaurant by its ID with its average rating.
+     *
+     * @param id The ID of the restaurant to retrieve.
+     * @return An Optional containing ApiRestaurantDto with the specified ID and its average rating,
+     *         or Optional.empty() if no restaurant is found.
+     */
+    public Optional<ApiRestaurantDto> findRestaurantWithAverageRatingById(int id) {
+        Optional<Restaurant> restaurantOptional = restaurantRepository.findRestaurantById(id);
+        if (restaurantOptional.isPresent()) {
+            Restaurant restaurant = restaurantOptional.get();
+            ApiRestaurantDto apiRestaurantDto = mapToApiRestaurantDto(restaurant);
+            return Optional.of(apiRestaurantDto);
+        }
+        return Optional.empty();
+    }
+
+    // Assume this method exists for mapping Restaurant to ApiRestaurantDto
+    private ApiRestaurantDto mapToApiRestaurantDto(Restaurant restaurant) {
+        ApiRestaurantDto dto = new ApiRestaurantDto();
+        dto.setId(restaurant.getId());
+        dto.setName(restaurant.getName());
+        // Add other fields as necessary
+        return dto;
+    /** I ADDED THE ABOVE CODE, I DON'T KNOW IF THIS WILL WORK... */ 
+    
     }
 
     // TODO

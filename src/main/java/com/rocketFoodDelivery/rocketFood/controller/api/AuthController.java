@@ -60,6 +60,7 @@ public class AuthController {
             response.setUser_id(user.getId());
             return ResponseEntity.ok().body(response);
         } catch (BadCredentialsException e) {
+            System.out.println(e);
             AuthResponseErrorDTO response = new AuthResponseErrorDTO();
             response.setSuccess(false);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);

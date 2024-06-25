@@ -70,16 +70,16 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     void updateRestaurant(int restaurantId, String name, int priceRange, String phone);
 
     // TODO
-    @Query(nativeQuery = true, value = "TODO Write SQL query here")
+    @Query(nativeQuery = true, value = "SELECT * FROM restaurants WHERE id = :restaurantId")
     Optional<Restaurant> findRestaurantById(@Param("restaurantId") int restaurantId);
 
     @Query(nativeQuery = true, value = "SELECT LAST_INSERT_ID() AS id")
     int getLastInsertedId();
+    // I ADDED THE ABOVE DON'T KNOW IF THIS CODE WILL WORK, GOT IT FROM CHAT
 
     // TODO
     @Modifying
     @Transactional
-    @Query(nativeQuery = true, value = "TODO Write SQL query here")
+    @Query(nativeQuery = true, value = "DELETE FROM restaurants WHERE id = :restaurantId")
     void deleteRestaurantById(@Param("restaurantId") int restaurantId);
-
 }
