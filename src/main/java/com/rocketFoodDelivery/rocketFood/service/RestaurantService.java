@@ -1,7 +1,9 @@
 package com.rocketFoodDelivery.rocketFood.service;
 
+import com.rocketFoodDelivery.rocketFood.dtos.ApiAddressDto;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiCreateRestaurantDto;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiRestaurantDto;
+import com.rocketFoodDelivery.rocketFood.models.Address;
 import com.rocketFoodDelivery.rocketFood.models.Restaurant;
 import com.rocketFoodDelivery.rocketFood.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,17 +102,46 @@ public class RestaurantService {
 
     // TODO
 
-    /**
-     * Creates a new restaurant and returns its information.
-     *
-     * @param restaurant The data for the new restaurant.
-     * @return An Optional containing the created restaurant's information as an ApiCreateRestaurantDto,
-     *         or Optional.empty() if the user with the provided user ID does not exist or if an error occurs during creation.
-     */
     @Transactional
-    public Optional<ApiCreateRestaurantDto> createRestaurant(ApiCreateRestaurantDto restaurant) {
-        return null; // TODO return proper object
-    }
+    public Optional<ApiCreateRestaurantDto> createRestaurant(ApiCreateRestaurantDto restaurantDto) {
+        try {
+
+        //  if (!userRepository.existsById(restaurantDto.getUserId())) {
+        //     return Optional.empty();
+        // }
+
+        ApiAddressDto receivedAddress = restaurantDto.getAddress();
+        System.out.println(receivedAddress);
+
+        Address newAddress = new Address();
+        newAddress.setStreetAddress(receivedAddress.getStreetAddress());
+        newAddress.setCity(receivedAddress.getCity());
+        newAddress.setPostalCode(receivedAddress.getPostalCode());
+        System.out.println(newAddress);
+
+        addressService.saveAddress(newAddress);
+
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(restaurantDto.getName());
+        restaurant.setPriceRange(restaurantDto.getPriceRange());
+        restaurant.setPhone(restaurantDto.getPhone());
+        restaurant.setEmail(restaurantDto.getEmail());
+        restaurant.setAddress(newAddress);
+        restaurant.setUserEntity(userRepository.findById(restaurantDto.getUserId()).get());
+
+        restaurantRepository.save(restaurant);
+
+        restaurantDto.setId(restaurant.getId());
+        return Optional.of(restaurantDto);
+    
+            
+        } catch (Exception e) {
+            System.out.println(e);
+           return null;
+        }
+    }  
+       
+
 
     /**ALL THE FOLLOWING BELOW IS WHAT I ADDED ON MY OWN
      * Finds a restaurant by its ID.
@@ -153,19 +184,38 @@ public class RestaurantService {
 
     // TODO
 
-    /**
-     * Updates an existing restaurant by ID with the provided data.
-     *
-     * @param id                  The ID of the restaurant to update.
-     * @param updatedRestaurantDto The updated data for the restaurant.
-     * @return An Optional containing the updated restaurant's information as an ApiCreateRestaurantDto,
-     *         or Optional.empty() if the restaurant with the specified ID is not found or if an error occurs during the update.
-     */
     @Transactional
     public Optional<ApiCreateRestaurantDto> updateRestaurant(int id, ApiCreateRestaurantDto updatedRestaurantDto) {
-        return null; // TODO return proper object
+        Optional<Restaurant> restaurantOptional = restaurantRepository.findById(id);
+
+        System.out.println(restaurantOptional);
+
+        if (restaurantOptional.isPresent()) {
+            Restaurant restaurant = restaurantOptional.get();
+            restaurant.setName(updatedRestaurantDto.getName());
+            restaurant.setPriceRange(updatedRestaurantDto.getPriceRange());
+            restaurant.setPhone(updatedRestaurantDto.getPhone());
+            restaurant.setEmail(updatedRestaurantDto.getEmail());
+                 System.out.println(restaurant);
+            // Set other fields as necessary...
+
+            restaurantRepository.save(restaurant);
+
+            return Optional.of(mapToApiCreateRestaurantDto(restaurant));
+        }
+
+        return Optional.empty();
     }
 
+    private ApiCreateRestaurantDto mapToApiCreateRestaurantDto(Restaurant restaurant) {
+        ApiCreateRestaurantDto dto = new ApiCreateRestaurantDto();
+        dto.setName(restaurant.getName());
+        dto.setPriceRange(restaurant.getPriceRange());
+        dto.setPhone(restaurant.getPhone());
+        dto.setEmail(restaurant.getEmail());
+        // Add other fields as necessary...
+        return dto;
+    }
     // TODO
 
     /**

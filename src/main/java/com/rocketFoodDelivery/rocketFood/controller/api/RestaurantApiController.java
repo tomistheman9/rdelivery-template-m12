@@ -26,49 +26,55 @@ public class RestaurantApiController {
 
     // TODO
 
-    /**
-     * Creates a new restaurant.
-     *
-     * @param restaurant The data for the new restaurant.
-     * @return ResponseEntity with the created restaurant's data, or a BadRequestException if creation fails.
-     */
-    @PostMapping("/api/restaurants")
-    public ResponseEntity<Object> createRestaurant(@RequestBody ApiCreateRestaurantDto restaurant) {
-        
-        return null; // TODO return proper object
+   @PostMapping("/api/restaurants")
+public ResponseEntity<Object> createRestaurant(@Valid @RequestBody ApiCreateRestaurantDto restaurant, BindingResult result) {
+    // if (result.hasErrors()) {
+    //     return ResponseBuilder.buildBadRequestResponse("Invalid data");
+    // }
+
+    Optional<ApiCreateRestaurantDto> createdRestaurant = restaurantService.createRestaurant(restaurant);
+
+    if (createdRestaurant.isPresent()) {
+        return ResponseBuilder.buildOkResponse(createdRestaurant.get());
+    } else {
+        throw new BadRequestException("Restaurant creation failed");
     }
+}
+
     
-    // TODO
-    // I CREATED THE BELOW CODE AND I DON'T KNOW IF IT WILL WORK 06/25/24 3:45pm
-    /**
-     * Deletes a restaurant by ID.
-     *
-     * @param id The ID of the restaurant to delete.
-     * @return ResponseEntity with a success message, or a ResourceNotFoundException if the restaurant is not found.
-     */
-    @DeleteMapping("/api/restaurants/{id}")
-    public ResponseEntity<Object> deleteRestaurant(@PathVariable int id) {
-        boolean isDeleted = restaurantService.deleteRestaurantById(id);
-        if (!isDeleted) {
-            throw new ResourceNotFoundException(String.format("Restaurant with id %d not found", id));
-        }
-        return ResponseBuilder.buildOkResponse(String.format("Restaurant with id %d has been deleted", id));
-    }
+    // // TODO
+    // // I CREATED THE BELOW CODE AND I DON'T KNOW IF IT WILL WORK 06/25/24 3:45pm
+    // /**
+    //  * Deletes a restaurant by ID.
+    //  *
+    //  @param id The ID of the restaurant to delete.
+    //  @return ResponseEntity with a success message, or a ResourceNotFoundException if the restaurant is not found.
+    
+    // @DeleteMapping("/api/restaurants/{id}")
+    // public ResponseEntity<Object> deleteRestaurant(@PathVariable int id) {
+    //     // boolean isDeleted = restaurantService.deleteRestaurantById(id);
+    //     if (!isDeleted) {
+    //         throw new ResourceNotFoundException(String.format("Restaurant with id %d not found", id));
+    //     }
+    //     return ResponseBuilder.buildOkResponse(String.format("Restaurant with id %d has been deleted", id));
+    // }
     // I CREATED THE ABOVE CODE AND I DON'T KNOW IF IT WILL WORK 06/25/24 3:45pm
 
     // TODO
 
-    /**
-     * Updates an existing restaurant by ID.
-     *
-     * @param id                    The ID of the restaurant to update.
-     * @param restaurantUpdateData  The updated data for the restaurant.
-     * @param result                BindingResult for validation.
-     * @return ResponseEntity with the updated restaurant's data
-     */
     @PutMapping("/api/restaurants/{id}")
     public ResponseEntity<Object> updateRestaurant(@PathVariable("id") int id, @Valid @RequestBody ApiCreateRestaurantDto restaurantUpdateData, BindingResult result) {
-        return null; // TODO return proper object
+        if (result.hasErrors()) {
+            return ResponseBuilder.buildBadRequestResponse("Invalid data");
+        }
+
+        Optional<ApiCreateRestaurantDto> updatedRestaurant = restaurantService.updateRestaurant(id, restaurantUpdateData);
+
+        if (updatedRestaurant.isPresent()) {
+            return ResponseBuilder.buildOkResponse(updatedRestaurant.get());
+        } else {
+            throw new ResourceNotFoundException(String.format("Restaurant with id %d not found", id));
+        }
     }
 
     /**

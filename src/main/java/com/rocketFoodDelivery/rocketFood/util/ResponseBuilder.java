@@ -25,4 +25,11 @@ public class ResponseBuilder {
         response.setData(data);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    public static ResponseEntity<Object> buildBadRequestResponse(String message) {
+        ApiResponseDTO response = new ApiResponseDTO();
+        response.setMessage(message);
+        response.setData(null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }
