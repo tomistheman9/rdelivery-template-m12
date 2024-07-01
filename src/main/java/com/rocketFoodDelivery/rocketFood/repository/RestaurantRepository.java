@@ -98,10 +98,10 @@ public interface RestaurantJpaRepository extends JpaRepository<Restaurant, Integ
     @Query(nativeQuery = true, value = "SELECT LAST_INSERT_ID() AS id")
     int getLastInsertedId();
 
-    @Modifying
-    @Transactional
-    @Query(nativeQuery = true, value = "DELETE FROM restaurants WHERE id = :restaurantId")
-    void deleteRestaurantById(@Param("restaurantId") int restaurantId);
+    // @Modifying
+    // @Transactional
+    // @Query(nativeQuery = true, value = "DELETE FROM restaurants WHERE id = :restaurantId")
+    // void deleteRestaurantById(@Param("restaurantId") int restaurantId);
 }
 
     // TODO
@@ -119,4 +119,35 @@ public interface RestaurantJpaRepository extends JpaRepository<Restaurant, Integ
     // @Transactional
     // @Query(nativeQuery = true, value = "DELETE FROM restaurants WHERE id = :restaurantId")
     // void deleteRestaurantById(@Param("restaurantId") int restaurantId);
+
+//   @Repository
+// public interface RestaurantRepository extends JpaRepository<Restaurant, Integer> {
+//     Optional<Restaurant> findByUserEntityId(int id);
+//     List<Restaurant> findAll();
+
+//     @Query(nativeQuery = true, value =
+//         "SELECT r.id, r.name, r.price_range, COALESCE(CEIL(SUM(o.restaurant_rating) / NULLIF(COUNT(o.id), 0)), 0) AS rating " +
+//         "FROM restaurants r " +
+//         "LEFT JOIN orders o ON r.id = o.restaurant_id " +
+//         "WHERE r.id = :restaurantId " +
+//         "GROUP BY r.id")
+//     List<Object[]> findRestaurantWithAverageRatingById(@Param("restaurantId") int restaurantId);
+
+//     @Query(nativeQuery = true, value =
+//         "SELECT * FROM (" +
+//         "   SELECT r.id, r.name, r.price_range, COALESCE(CEIL(SUM(o.restaurant_rating) / NULLIF(COUNT(o.id), 0)), 0) AS rating " +
+//         "   FROM restaurants r " +
+//         "   LEFT JOIN orders o ON r.id = o.restaurant_id " +
+//         "   WHERE (:priceRange IS NULL OR r.price_range = :priceRange) " +
+//         "   GROUP BY r.id" +
+//         ") AS result " +
+//         "WHERE (:rating IS NULL OR result.rating = :rating)")
+//     List<Object[]> findRestaurantsByRatingAndPriceRange(@Param("rating") Integer rating, @Param("priceRange") Integer priceRange);
+
+     @Modifying
+    @Transactional
+    @Query(nativeQuery = true, value = "DELETE FROM restaurants WHERE id = :restaurantId")
+    void deleteRestaurantById(@Param("restaurantId") int restaurantId);
 }
+
+// }

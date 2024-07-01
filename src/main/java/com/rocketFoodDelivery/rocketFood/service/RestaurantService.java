@@ -3,6 +3,7 @@ package com.rocketFoodDelivery.rocketFood.service;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiAddressDto;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiCreateRestaurantDto;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiRestaurantDto;
+import com.rocketFoodDelivery.rocketFood.exception.ResourceNotFoundException;
 import com.rocketFoodDelivery.rocketFood.models.Address;
 import com.rocketFoodDelivery.rocketFood.models.Restaurant;
 import com.rocketFoodDelivery.rocketFood.repository.*;
@@ -27,15 +28,14 @@ public class RestaurantService {
     private final UserRepository userRepository;
     private final AddressService addressService;
 
-    @Autowired
+   @Autowired
     public RestaurantService(
         RestaurantRepository restaurantRepository,
         ProductRepository productRepository,
         OrderRepository orderRepository,
         ProductOrderRepository productOrderRepository,
         UserRepository userRepository,
-        AddressService addressService
-        ) {
+        AddressService addressService) {
         this.restaurantRepository = restaurantRepository;
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
@@ -218,13 +218,11 @@ public class RestaurantService {
     }
     // TODO
 
-    /**
-     * Deletes a restaurant along with its associated data, including its product orders, orders and products.
-     *
-     * @param restaurantId The ID of the restaurant to delete.
-     */
-    @Transactional
+     @Transactional
     public void deleteRestaurant(int restaurantId) {
-        return;
+        if (!restaurantRepository.existsById(restaurantId)) {
+            throw new ResourceNotFoundException("Restaurant not found");
+        }
+        restaurantRepository.deleteRestaurantById(restaurantId);
     }
 }

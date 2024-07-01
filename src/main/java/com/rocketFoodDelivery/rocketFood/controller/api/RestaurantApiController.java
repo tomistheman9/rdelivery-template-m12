@@ -50,14 +50,17 @@ public ResponseEntity<Object> createRestaurant(@Valid @RequestBody ApiCreateRest
     //  @param id The ID of the restaurant to delete.
     //  @return ResponseEntity with a success message, or a ResourceNotFoundException if the restaurant is not found.
     
-    // @DeleteMapping("/api/restaurants/{id}")
-    // public ResponseEntity<Object> deleteRestaurant(@PathVariable int id) {
-    //     // boolean isDeleted = restaurantService.deleteRestaurantById(id);
-    //     if (!isDeleted) {
-    //         throw new ResourceNotFoundException(String.format("Restaurant with id %d not found", id));
-    //     }
-    //     return ResponseBuilder.buildOkResponse(String.format("Restaurant with id %d has been deleted", id));
-    // }
+    @DeleteMapping("/api/restaurants/{id}")
+    public ResponseEntity<Object> deleteRestaurant(@PathVariable int id) {
+        try {
+            restaurantService.deleteRestaurant(id);
+            return ResponseBuilder.buildOkResponse(String.format("Restaurant with id %d has been deleted", id));
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(String.format("Restaurant with id %d not found", id));
+        } catch (Exception e) {
+            return ResponseBuilder.buildBadRequestResponse(e.getMessage());
+        }
+    }
     // I CREATED THE ABOVE CODE AND I DON'T KNOW IF IT WILL WORK 06/25/24 3:45pm
 
     // TODO
