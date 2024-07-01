@@ -12,12 +12,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApiRestaurantDto {
-    int id;
+    private int id;
     
-    String name;
+    private String name;
 
     @JsonProperty("price_range")
-    int priceRange;
+    private int priceRange;
 
-    int rating;
+    private int rating;
 }
