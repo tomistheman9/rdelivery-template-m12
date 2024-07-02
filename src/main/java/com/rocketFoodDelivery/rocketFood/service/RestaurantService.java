@@ -5,6 +5,7 @@ import com.rocketFoodDelivery.rocketFood.dtos.ApiCreateRestaurantDto;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiRestaurantDto;
 import com.rocketFoodDelivery.rocketFood.exception.ResourceNotFoundException;
 import com.rocketFoodDelivery.rocketFood.models.Address;
+import com.rocketFoodDelivery.rocketFood.models.Product;
 import com.rocketFoodDelivery.rocketFood.models.Restaurant;
 import com.rocketFoodDelivery.rocketFood.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,5 +145,9 @@ public class RestaurantService {
             throw new ResourceNotFoundException("Restaurant not found");
         }
         restaurantRepository.deleteRestaurantById(restaurantId);
+    }
+
+    public List<Product> findProductsByRestaurantId(int restaurantId) {
+        return productRepository.findProductsByRestaurantId(restaurantId);
     }
 }

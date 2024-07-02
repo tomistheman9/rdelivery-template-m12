@@ -6,7 +6,7 @@ import com.rocketFoodDelivery.rocketFood.service.RestaurantService;
 import com.rocketFoodDelivery.rocketFood.util.ResponseBuilder;
 import com.rocketFoodDelivery.rocketFood.exception.*;
 import com.rocketFoodDelivery.rocketFood.models.Order;
-
+import com.rocketFoodDelivery.rocketFood.models.Product;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/restaurants")
 public class RestaurantApiController {
     private RestaurantService restaurantService;
 
@@ -27,7 +28,7 @@ public class RestaurantApiController {
         this.restaurantService = restaurantService;
     }
 
-    @PostMapping("/api/restaurants")
+    @PostMapping
     public ResponseEntity<Object> createRestaurant(@Valid @RequestBody ApiCreateRestaurantDto restaurant, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseBuilder.buildBadRequestResponse("Invalid data");
@@ -42,7 +43,7 @@ public class RestaurantApiController {
         }
     }
 
-    @DeleteMapping("/api/restaurants/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteRestaurant(@PathVariable int id) {
         try {
             restaurantService.deleteRestaurant(id);
@@ -54,7 +55,7 @@ public class RestaurantApiController {
         }
     }
 
-    @PutMapping("/api/restaurants/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Object> updateRestaurant(@PathVariable("id") int id, @Valid @RequestBody ApiCreateRestaurantDto restaurantUpdateData, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseBuilder.buildBadRequestResponse("Invalid data");
@@ -69,7 +70,7 @@ public class RestaurantApiController {
         }
     }
 
-    @GetMapping("/api/restaurants/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Object> getRestaurantById(@PathVariable int id) {
         Optional<ApiRestaurantDto> restaurantOptional = restaurantService.findRestaurantWithAverageRatingById(id);
 
@@ -80,13 +81,13 @@ public class RestaurantApiController {
         }
     }
 
-    @GetMapping("/api/restaurants")
+    @GetMapping
     public ResponseEntity<Object> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantService.findAllRestaurants();
         return ResponseBuilder.buildOkResponse(restaurants);
     }
 
-    @GetMapping("/api/restaurants/filter")
+    @GetMapping("/filter")
     public ResponseEntity<Object> getRestaurantsByRatingAndPriceRange(
             @RequestParam(name = "rating", required = false) Integer rating,
             @RequestParam(name = "priceRange", required = false) Integer priceRange) {
@@ -98,16 +99,10 @@ public class RestaurantApiController {
         }
     }
 
-    // @GetMapping("/api/orders")
-    // public ResponseEntity<Object> getOrdersByUserTypeAndId(
-    //         @RequestParam(name = "userType") String userType,
-    //         @RequestParam(name = "userId") int userId) {
-    //     try {
-    //         List<Order> orders = restaurantService.getOrdersByUserTypeAndId(userType, userId);
-    //         return ResponseBuilder.buildOkResponse(orders);
-    //     } catch (IllegalArgumentException e) {
-    //         return ResponseBuilder.buildBadRequestResponse(e.getMessage());
-    //     }
-    
+    @GetMapping("/{id}/products")
+    public ResponseEntity<Object> getProductsByRestaurantId(@PathVariable int id) {
+        List<Product> products = restaurantService.findProductsByRestaurantId(id);
+        return ResponseBuilder.buildOkResponse(products);
+    }
 }
 
