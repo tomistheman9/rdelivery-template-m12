@@ -58,7 +58,7 @@ public class RestaurantService {
             int roundedAvgRating = (int) Math.ceil(avgRating);
             restaurantDtos.add(new ApiRestaurantDto(restaurantId, name, range, roundedAvgRating));
         }
-
+        System.out.println(restaurantDtos);
         return restaurantDtos;
     }
 
