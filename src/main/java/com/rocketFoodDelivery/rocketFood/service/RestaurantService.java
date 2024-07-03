@@ -5,9 +5,15 @@ import com.rocketFoodDelivery.rocketFood.dtos.ApiCreateRestaurantDto;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiRestaurantDto;
 import com.rocketFoodDelivery.rocketFood.exception.ResourceNotFoundException;
 import com.rocketFoodDelivery.rocketFood.models.Address;
+import com.rocketFoodDelivery.rocketFood.models.Order;
+import com.rocketFoodDelivery.rocketFood.models.OrderStatus;
 import com.rocketFoodDelivery.rocketFood.models.Product;
 import com.rocketFoodDelivery.rocketFood.models.Restaurant;
-import com.rocketFoodDelivery.rocketFood.repository.*;
+import com.rocketFoodDelivery.rocketFood.repository.OrderRepository;
+import com.rocketFoodDelivery.rocketFood.repository.OrderStatusRepository;
+import com.rocketFoodDelivery.rocketFood.repository.ProductRepository;
+import com.rocketFoodDelivery.rocketFood.repository.RestaurantRepository;
+import com.rocketFoodDelivery.rocketFood.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,22 +29,22 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
-    private final ProductOrderRepository productOrderRepository;
+    private final OrderStatusRepository orderStatusRepository;
     private final UserRepository userRepository;
     private final AddressService addressService;
 
     @Autowired
     public RestaurantService(
-        RestaurantRepository restaurantRepository,
-        ProductRepository productRepository,
-        OrderRepository orderRepository,
-        ProductOrderRepository productOrderRepository,
-        UserRepository userRepository,
-        AddressService addressService) {
+            RestaurantRepository restaurantRepository,
+            ProductRepository productRepository,
+            OrderRepository orderRepository,
+            OrderStatusRepository orderStatusRepository,
+            UserRepository userRepository,
+            AddressService addressService) {
         this.restaurantRepository = restaurantRepository;
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
-        this.productOrderRepository = productOrderRepository;
+        this.orderStatusRepository = orderStatusRepository;
         this.userRepository = userRepository;
         this.addressService = addressService;
     }
@@ -59,36 +65,30 @@ public class RestaurantService {
             int roundedAvgRating = (int) Math.ceil(avgRating);
             restaurantDtos.add(new ApiRestaurantDto(restaurantId, name, range, roundedAvgRating));
         }
-        System.out.println(restaurantDtos);
         return restaurantDtos;
     }
 
     @Transactional
     public Optional<ApiCreateRestaurantDto> createRestaurant(ApiCreateRestaurantDto restaurantDto) {
-        try {
-            ApiAddressDto receivedAddress = restaurantDto.getAddress();
-            Address newAddress = new Address();
-            newAddress.setStreetAddress(receivedAddress.getStreetAddress());
-            newAddress.setCity(receivedAddress.getCity());
-            newAddress.setPostalCode(receivedAddress.getPostalCode());
-            addressService.saveAddress(newAddress);
+        ApiAddressDto receivedAddress = restaurantDto.getAddress();
+        Address newAddress = new Address();
+        newAddress.setStreetAddress(receivedAddress.getStreetAddress());
+        newAddress.setCity(receivedAddress.getCity());
+        newAddress.setPostalCode(receivedAddress.getPostalCode());
+        addressService.saveAddress(newAddress);
 
-            Restaurant restaurant = new Restaurant();
-            restaurant.setName(restaurantDto.getName());
-            restaurant.setPriceRange(restaurantDto.getPriceRange());
-            restaurant.setPhone(restaurantDto.getPhone());
-            restaurant.setEmail(restaurantDto.getEmail());
-            restaurant.setAddress(newAddress);
-            restaurant.setUserEntity(userRepository.findById(restaurantDto.getUserId()).get());
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(restaurantDto.getName());
+        restaurant.setPriceRange(restaurantDto.getPriceRange());
+        restaurant.setPhone(restaurantDto.getPhone());
+        restaurant.setEmail(restaurantDto.getEmail());
+        restaurant.setAddress(newAddress);
+        restaurant.setUserEntity(userRepository.findById(restaurantDto.getUserId()).get());
 
-            restaurantRepository.save(restaurant);
-            restaurantDto.setId(restaurant.getId());
+        restaurantRepository.save(restaurant);
+        restaurantDto.setId(restaurant.getId());
 
-            return Optional.of(restaurantDto);
-        } catch (Exception e) {
-            System.out.println(e);
-            return Optional.empty();
-        }
+        return Optional.of(restaurantDto);
     }
 
     public Optional<ApiRestaurantDto> findRestaurantWithAverageRatingById(int id) {
@@ -150,4 +150,21 @@ public class RestaurantService {
     public List<Product> findProductsByRestaurantId(int restaurantId) {
         return productRepository.findProductsByRestaurantId(restaurantId);
     }
+@Transactional
+public void updateOrderStatus(int orderId, String statusName) {
+    Optional<Order> orderOptional = orderRepository.findById(orderId);
+    if (!orderOptional.isPresent()) {
+        throw new ResourceNotFoundException("Order with ID " + orderId + " not found.");
+    }
+    Order order = orderOptional.get();
+
+    // Map string status to OrderStatus entity
+    Optional<OrderStatus> statusOptional = orderStatusRepository.findByName(statusName);
+    if (!statusOptional.isPresent()) {
+        throw new IllegalArgumentException("Invalid status: " + statusName);
+    }
+    order.setOrderStatus(statusOptional.get());
+    orderRepository.save(order);
+}
+
 }

@@ -8,7 +8,10 @@ import java.util.Optional;
 
 @Repository
 public interface OrderStatusRepository extends JpaRepository<OrderStatus, Integer> {
-    Optional<OrderStatus> findById(int id);
-    Optional<OrderStatus> findByName(String string);
-
+    /**
+     * Finds an OrderStatus by its name.
+     * @param name The name of the status (e.g., "pending", "in progress", "delivered").
+     * @return An Optional containing the found OrderStatus, or an empty Optional if no status matches the name.
+     */
+    Optional<OrderStatus> findByName(String name);
 }
