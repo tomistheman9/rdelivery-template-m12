@@ -2,8 +2,10 @@ package com.rocketFoodDelivery.rocketFood.controller.api;
 
 import com.rocketFoodDelivery.rocketFood.dtos.ApiCreateRestaurantDto;
 import com.rocketFoodDelivery.rocketFood.dtos.ApiRestaurantDto;
+import com.rocketFoodDelivery.rocketFood.models.Order;
 import com.rocketFoodDelivery.rocketFood.models.Product;
 import com.rocketFoodDelivery.rocketFood.models.Restaurant;
+import com.rocketFoodDelivery.rocketFood.service.CustomOrderService;
 import com.rocketFoodDelivery.rocketFood.service.RestaurantService;
 import com.rocketFoodDelivery.rocketFood.util.ResponseBuilder;
 import com.rocketFoodDelivery.rocketFood.exception.*;
@@ -12,21 +14,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/restaurants")
+@RequestMapping("/api")
 public class RestaurantApiController {
-    private RestaurantService restaurantService;
+    private final RestaurantService restaurantService;
+    private final CustomOrderService customOrderService;
 
     @Autowired
-    public RestaurantApiController(RestaurantService restaurantService) {
+    public RestaurantApiController(RestaurantService restaurantService, CustomOrderService customOrderService) {
         this.restaurantService = restaurantService;
+        this.customOrderService = customOrderService;
     }
 
-    @PostMapping
+    @PostMapping("/restaurants")
     public ResponseEntity<Object> createRestaurant(@Valid @RequestBody ApiCreateRestaurantDto restaurantDto, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseBuilder.buildBadRequestResponse("Invalid data");
@@ -36,7 +41,7 @@ public class RestaurantApiController {
                 .orElseThrow(() -> new BadRequestException("Restaurant creation failed"));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/restaurants/{id}")
     public ResponseEntity<Object> deleteRestaurant(@PathVariable int id) {
         try {
             restaurantService.deleteRestaurant(id);
@@ -48,7 +53,7 @@ public class RestaurantApiController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/restaurants/{id}")
     public ResponseEntity<Object> updateRestaurant(@PathVariable("id") int id, @Valid @RequestBody ApiCreateRestaurantDto restaurantUpdateDto, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseBuilder.buildBadRequestResponse("Invalid data");
@@ -58,20 +63,20 @@ public class RestaurantApiController {
                 .orElseThrow(() -> new BadRequestException(String.format("Unable to update restaurant with id %d", id)));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/restaurants/{id}")
     public ResponseEntity<Object> getRestaurantById(@PathVariable int id) {
         Optional<ApiRestaurantDto> restaurant = restaurantService.findRestaurantWithAverageRatingById(id);
         return restaurant.map(ResponseBuilder::buildOkResponse)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Restaurant with id %d not found", id)));
     }
 
-    @GetMapping
+    @GetMapping("/restaurants")
     public ResponseEntity<Object> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantService.findAllRestaurants();
         return ResponseBuilder.buildOkResponse(restaurants);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/restaurants/filter")
     public ResponseEntity<Object> getRestaurantsByRatingAndPriceRange(
             @RequestParam(name = "rating", required = false) Integer rating,
             @RequestParam(name = "priceRange", required = false) Integer priceRange) {
@@ -79,24 +84,35 @@ public class RestaurantApiController {
         return ResponseBuilder.buildOkResponse(restaurants);
     }
 
-    @GetMapping("/{id}/products")
+    @GetMapping("/restaurants/{id}/products")
     public ResponseEntity<Object> getProductsByRestaurantId(@PathVariable int id) {
         List<Product> products = restaurantService.findProductsByRestaurantId(id);
         return ResponseBuilder.buildOkResponse(products);
     }
 
-   @PatchMapping("/orders/{orderId}/status")
-public ResponseEntity<Object> updateOrderStatus(@PathVariable int orderId, @RequestBody Map<String, String> statusMap) {
-    if (!statusMap.containsKey("status")) {
-        return ResponseBuilder.buildBadRequestResponse("Missing 'status' in request body");
+    @PatchMapping("/orders/{orderId}/status")
+    public ResponseEntity<Object> updateOrderStatus(@PathVariable int orderId, @RequestBody Map<String, String> statusMap) {
+        if (!statusMap.containsKey("status")) {
+            return ResponseBuilder.buildBadRequestResponse("Missing 'status' in request body");
+        }
+        String status = statusMap.get("status");
+        try {
+            restaurantService.updateOrderStatus(orderId, status);
+            return ResponseBuilder.buildOkResponse("Order status updated successfully");
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
+            return ResponseBuilder.buildBadRequestResponse(e.getMessage());
+        }
     }
-    String status = statusMap.get("status");
-    try {
-        restaurantService.updateOrderStatus(orderId, status);
-        return ResponseBuilder.buildOkResponse("Order status updated successfully");
-    } catch (ResourceNotFoundException | IllegalArgumentException e) {
-        return ResponseBuilder.buildBadRequestResponse(e.getMessage());
-    }
-}
 
+    @GetMapping("/orders")
+    public ResponseEntity<Object> getOrdersByUserTypeAndId(
+            @RequestParam(name = "type") String userType,
+            @RequestParam(name = "id") int id) {
+        try {
+            List<Order> orders = customOrderService.getOrdersByUserTypeAndId(userType, id);
+            return ResponseBuilder.buildOkResponse(orders);
+        } catch (IllegalArgumentException e) {
+            return ResponseBuilder.buildBadRequestResponse(e.getMessage());
+        }
+    }
 }

@@ -75,7 +75,7 @@ public class RestaurantService {
         newAddress.setStreetAddress(receivedAddress.getStreetAddress());
         newAddress.setCity(receivedAddress.getCity());
         newAddress.setPostalCode(receivedAddress.getPostalCode());
-        addressService.saveAddress(newAddress);
+        // newAddress.setAddress(newAddress);
 
         Restaurant restaurant = new Restaurant();
         restaurant.setName(restaurantDto.getName());
@@ -166,5 +166,7 @@ public void updateOrderStatus(int orderId, String statusName) {
     order.setOrderStatus(statusOptional.get());
     orderRepository.save(order);
 }
+
+
 
 }
